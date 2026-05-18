@@ -1,0 +1,8 @@
+# Local env files (optional)
+.env
+.env.local
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.log

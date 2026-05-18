@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Speedgate Logistics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="loginView" class="admin-login-wrap">
+    <div class="admin-login-card">
+      <h1>Speedgate Admin</h1>
+      <p>Sign in to manage cars, blogs, services, and site content.</p>
+      <div id="loginError" class="admin-error" role="alert"></div>
+      <form id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" name="email" required autocomplete="username" />
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" name="password" required autocomplete="current-password" />
+        <button type="submit">Sign In</button>
+      </form>
+      <p style="margin-top:1rem;font-size:.75rem;text-align:center">
+        <a href="index.html" style="color:var(--navy)">Back to website</a>
+      </p>
+    </div>
+  </div>
+
+  <div id="adminShell" class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="brand">
+        <strong>SPEEDGATE</strong>
+        <span>Content Management</span>
+      </div>
+      <nav class="admin-nav" id="adminNav">
+        <button type="button" data-panel="cars" class="active"><i class="fas fa-car"></i> Cars</button>
+        <button type="button" data-panel="blogs"><i class="fas fa-newspaper"></i> Blog Posts</button>
+        <button type="button" data-panel="services"><i class="fas fa-globe"></i> Import Services</button>
+        <button type="button" data-panel="features"><i class="fas fa-star"></i> Features</button>
+        <button type="button" data-panel="process"><i class="fas fa-list-ol"></i> Process Steps</button>
+        <button type="button" data-panel="why"><i class="fas fa-thumbs-up"></i> Why Choose Us</button>
+        <button type="button" data-panel="settings"><i class="fas fa-cog"></i> Site Text</button>
+        <button type="button" data-panel="inquiries"><i class="fas fa-inbox"></i> Inquiries</button>
+        <button type="button" data-panel="newsletter"><i class="fas fa-envelope"></i> Newsletter</button>
+        <button type="button" id="logoutBtn" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </aside>
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <div>
+          <h2 id="panelTitle">Cars</h2>
+          <span class="user-email" id="userEmail"></span>
+        </div>
+        <button type="button" class="btn btn-primary" id="addBtn"><i class="fas fa-plus"></i> Add New</button>
+      </div>
+      <div id="panelContent" class="admin-panel active" data-panel="cars"></div>
+    </main>
+  </div>
+
+  <div id="editModal" class="admin-modal" aria-hidden="true">
+    <div class="admin-modal-card" id="editModalCard">
+      <h3 id="modalTitle">Edit</h3>
+      <form id="editForm" class="admin-form"></form>
+      <div class="admin-modal-actions">
+        <button type="button" class="btn btn-ghost" id="modalCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="modalSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminToast" class="admin-toast"></div>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

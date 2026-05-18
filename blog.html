@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog | Speedgate Logistics</title>
+  <meta name="description" content="Car import guides and news for Kenya." />
+  <link rel="canonical" id="canonicalLink" href="" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root { --navy: #002147; --orange: #f58220; --gray-50: #f5f7fa; --gray-600: #64748b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Poppins, sans-serif; color: #1e293b; background: var(--gray-50); line-height: 1.65; }
+  .blog-header { background: var(--navy); color: #fff; padding: 1rem 0; }
+    .blog-header .inner { max-width: 800px; margin: 0 auto; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .blog-header a { color: #fff; text-decoration: none; font-size: .85rem; font-weight: 600; }
+    .blog-header a:hover { color: var(--orange); }
+    .blog-header strong { font-size: .95rem; }
+    main { max-width: 800px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+    .blog-hero-img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; }
+    h1 { font-size: clamp(1.5rem, 4vw, 2rem); color: var(--navy); margin-bottom: .75rem; line-height: 1.25; }
+    .blog-meta { font-size: .8rem; color: var(--gray-600); margin-bottom: 1.5rem; }
+    .blog-content { background: #fff; border-radius: 12px; padding: 1.5rem 1.75rem; border: 1px solid #e2e8f0; }
+    .blog-content h2, .blog-content h3 { color: var(--navy); margin: 1.25rem 0 .5rem; }
+    .blog-content p { margin-bottom: 1rem; }
+    .blog-content ul, .blog-content ol { margin: 0 0 1rem 1.25rem; }
+    .blog-content a { color: var(--orange); }
+    .blog-content img { max-width: 100%; height: auto; border-radius: 8px; }
+    .blog-loading, .blog-error { text-align: center; padding: 3rem 1rem; color: var(--gray-600); }
+    .blog-error a { color: var(--orange); font-weight: 600; }
+    .cta-box { margin-top: 2rem; padding: 1.25rem; background: var(--navy); color: #fff; border-radius: 10px; text-align: center; }
+    .cta-box a { display: inline-block; margin-top: .75rem; padding: .6rem 1.25rem; background: var(--orange); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <header class="blog-header">
+    <div class="inner">
+      <strong>SPEEDGATE LOGISTICS</strong>
+      <a href="index.html"><i class="fas fa-arrow-left"></i> Back to site</a>
+    </div>
+  </header>
+  <main id="blogMain">
+    <p class="blog-loading">Loading article…</p>
+  </main>
+  <script src="js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const slug = params.get('slug');
+      const main = document.getElementById('blogMain');
+      const canonical = document.getElementById('canonicalLink');
+
+      if (!slug) {
+        main.innerHTML = '<p class="blog-error">No article specified. <a href="index.html#blog">Browse the blog</a></p>';
+        return;
+      }
+      if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+        main.innerHTML = '<p class="blog-error">Unable to load article.</p>';
+        return;
+      }
+
+      const sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+      function escapeHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      sb.from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (error || !data) {
+            main.innerHTML = '<p class="blog-error">Article not found. <a href="index.html#blog">Back to blog</a></p>';
+            return;
+          }
+
+          const title = data.title || 'Blog';
+          const desc = (data.meta_description || data.excerpt || '').trim();
+          document.title = title + ' | Speedgate Logistics';
+          if (desc) {
+            let meta = document.querySelector('meta[name="description"]');
+            if (meta) meta.setAttribute('content', desc);
+          }
+          if (canonical) {
+            const clean = location.origin + location.pathname.replace(/blog\.html$/, '') + 'blog/' + encodeURIComponent(slug);
+            canonical.href = clean;
+          }
+
+          const date = data.created_at ? new Date(data.created_at).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+          const img = data.image_url
+            ? '<img class="blog-hero-img" src="' + data.image_url.replace(/"/g, '&quot;') + '" alt="" />'
+            : '';
+          const html = (data.content || '').trim();
+          const isHtml = html.startsWith('<');
+
+          main.innerHTML =
+            img +
+            '<h1>' + escapeHtml(title) + '</h1>' +
+            (date ? '<p class="blog-meta">' + date + '</p>' : '') +
+            '<article class="blog-content">' + (isHtml ? html : '<p>' + escapeHtml(html).replace(/\n/g, '</p><p>') + '</p>') + '</article>' +
+            '<div class="cta-box"><p>Ready to import your vehicle?</p><a href="index.html#contact">Get a free quote</a></div>';
+        });
+    })();
+  </script>
+</body>
+</html>
