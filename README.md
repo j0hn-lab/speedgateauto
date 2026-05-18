@@ -1,35 +1,63 @@
-# Speedgate Logistics
+# Supabase setup — Speedgate Logistics
 
-Marketing website for **Speedgate Logistics** — car import services to Kenya.
+Project ref: `uhkasicofnopccurzqqh`  
+REST base: `https://uhkasicofnopccurzqqh.supabase.co`
 
-## Run locally
+## 1. Run SQL migrations (in order)
 
-Open `index.html` in a browser, or use a static server:
+1. Open [Supabase Dashboard](https://supabase.com/dashboard) → your project → **SQL Editor**.
+2. Run **`migrations/001_initial.sql`** (contact form, newsletter, hero searches).
+3. Run **`migrations/002_admin_cms_auth.sql`** (admins, CMS tables, storage, seed data).
+4. Run **`migrations/003_blog_seo_meta.sql`** (blog `meta_description` for SEO).
 
-```bash
-npx serve .
-```
+## 2. Enable email login
 
-## Supabase (forms)
+**Authentication → Providers → Email** → enable Email provider (confirm email can be off for internal admins).
 
-1. Run `supabase_schema.sql` in your Supabase SQL editor.
-2. Set your anon key in `js/supabase-config.js`.
-3. Contact form saves to `public.inquiries`; hero search logs to `public.hero_searches`.
+## 3. Configure the website
 
-## Edit content / layout
+Set `window.SUPABASE_ANON_KEY` in **`js/supabase-config.js`** (Project Settings → API → anon public key).
 
-- **Styles:** `css/speedgate.css`
-- **Page HTML:** `build_fragment.html` → run `node build.js` → regenerates `index.html`
-- **Scripts:** `js/site.js`, `js/supabase-db.js`
+Never put the **service_role** key in frontend code.
 
-## Deploy on Vercel
+## 4. Admin accounts (created by migration 002)
 
-1. Push this folder to GitHub.
-2. Import the repo at [vercel.com](https://vercel.com) — framework preset **Other**, output directory **`.`** (root).
-3. Deploy. No build command required.
+| Email | Password |
+|-------|----------|
+| speedgateauto@gmail.com | `#speedgateauto` |
+| johnkamau.maestro@gmail.com | `#speedgateauto` |
 
-## Brand contact (from design)
+**Change these passwords after first login** (Authentication → Users → user → reset password).
 
-- Phone: +254 789 071 061
-- Email: info@speedgatelogistics.co.ke
-- WhatsApp: [wa.me/254789071061](https://wa.me/254789071061)
+## 5. Admin dashboard
+
+Open **`admin.html`** on your site (or click **Login** in the main nav).
+
+Admins can manage:
+
+- **Cars** — listings with image upload to Storage
+- **Blog posts** — title, slug, excerpt, full content, images
+- **Import services**, **features**, **process steps**, **why choose us**
+- **Site text** — hero and about copy (`site_settings`)
+- **Inquiries** & **newsletter** — view and delete submissions
+
+The public site (`index.html`) loads published content via `js/public-content.js`.
+
+## 6. Storage
+
+Migration creates public bucket **`website-media`** (max 5MB per image). Admins upload via the dashboard; URLs are saved on car/blog records.
+
+## 7. Tables overview
+
+| Table | Public | Admin |
+|-------|--------|-------|
+| `cars`, `blog_posts`, `import_services`, … | Read published | Full CRUD |
+| `site_settings` | Read all keys | Update |
+| `inquiries`, `newsletter_subscribers` | Insert only | Read / delete |
+| `admin_users` | — | Linked to Auth users |
+
+## 8. Troubleshooting
+
+- **Invalid login**: Run migration 002 again or create users under Authentication → Users with the same emails, then ensure rows exist in `public.admin_users`.
+- **Permission denied on save**: User must be signed in and listed in `admin_users` with `active = true`.
+- **Upload fails**: Confirm bucket `website-media` exists and storage policies were applied (re-run migration 002).
